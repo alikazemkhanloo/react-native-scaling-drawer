@@ -1,5 +1,4 @@
-import React, {Component} from 'react';
-import PropTypes from 'prop-types';
+import React, {PropTypes, Component} from 'react';
 import {
   StyleSheet,
   View,
@@ -26,7 +25,7 @@ class SwipeAbleDrawer extends Component {
     this.isBlockDrawer = false;
     this.translateX = 0;
     this.scale = 1;
-    this.maxTranslateXValue = Math.ceil(width * props.minimizeFactor);
+    this.maxTranslateXValue = -Math.ceil(width * props.minimizeFactor);
     this.drawerAnimation = new Animated.Value(0);
   }
 
@@ -54,15 +53,15 @@ class SwipeAbleDrawer extends Component {
     }
   };
   _onMoveShouldSetPanResponder = (e, {dx, dy, moveX}) => {
-    if (!this.isBlockDrawer) {
-      return ((Math.abs(dx) > Math.abs(dy)
-      && dx < 20 && moveX < this.props.swipeOffset) || this.state.isOpen);
-    }
-    return false;
+    // if (!this.isBlockDrawer) {
+    //   return ((Math.abs(dx) > Math.abs(dy)
+    //   && dx < 20 && moveX < this.props.swipeOffset) || this.state.isOpen);
+    // }
+    return true;
   };
   _onPanResponderMove = (e, {dx}) => {
-    if (dx < 0 && !this.state.isOpen) return false;
-    if (Math.round(dx) < this.maxTranslateXValue && !this.state.isOpen) {
+    if (dx > 0 && !this.state.isOpen) return false;
+    if (Math.round(dx) > this.maxTranslateXValue && !this.state.isOpen) {
       this.translateX = Math.round(dx);
       this.scale = 1 - ((this.translateX  * (1 - this.props.scalingFactor)) / this.maxTranslateXValue);
 
@@ -80,8 +79,8 @@ class SwipeAbleDrawer extends Component {
   };
 
   _onPanResponderRelease = (e, {dx}) => {
-    if (dx < 0 && !this.state.isOpen) return false;
-    if (dx > width * 0.1) {
+    if (dx > 0 && !this.state.isOpen) return false;
+    if (dx < -width * 0.1) {
       this.setState({isOpen: true}, () => {
         this.scale = this.props.scalingFactor;
         this.translateX = this.maxTranslateXValue;
@@ -113,31 +112,31 @@ class SwipeAbleDrawer extends Component {
 
   animationInterpolate() {
     return this.state.isOpen ?
-    {
-      translateX: this.drawerAnimation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [this.translateX, this.maxTranslateXValue],
-        extrapolate: 'clamp'
-      }),
-      scale: this.drawerAnimation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [this.scale, this.props.scalingFactor],
-        extrapolate: 'clamp'
-      })
-    }
+      {
+        translateX: this.drawerAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [this.translateX, this.maxTranslateXValue],
+          extrapolate: 'clamp'
+        }),
+        scale: this.drawerAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [this.scale, this.props.scalingFactor],
+          extrapolate: 'clamp'
+        })
+      }
       :
-    {
-      translateX: this.drawerAnimation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [this.translateX, 0],
-        extrapolate: 'clamp'
-      }),
-      scale: this.drawerAnimation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [this.scale, 1],
-        extrapolate: 'clamp'
-      })
-    }
+      {
+        translateX: this.drawerAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [this.translateX, 0],
+          extrapolate: 'clamp'
+        }),
+        scale: this.drawerAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: [this.scale, 1],
+          extrapolate: 'clamp'
+        })
+      }
   }
 
   close = () => {

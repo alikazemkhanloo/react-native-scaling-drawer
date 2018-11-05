@@ -119,7 +119,8 @@ class SwipeAbleDrawer extends Component {
       {
         toValue: 1,
         duration: this.props.duration || 250,
-        Easing: Easing.linear
+        Easing: Easing.linear,
+        useNativeDriver: true,
       }
     ).start();
   }
@@ -231,6 +232,7 @@ const styles = StyleSheet.create({
       width: -10,
       height: 0,
     },
+    elevation:15,
     shadowColor: 'rgba(0,0,0,0.8)',
     shadowOpacity: 1,
     shadowRadius: 19,

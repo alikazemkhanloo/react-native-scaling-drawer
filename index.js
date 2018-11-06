@@ -24,7 +24,8 @@ class SwipeAbleDrawer extends Component {
     this.state = {
       isOpen: false,
       dims: Dimensions.get("window"),
-      statusBarHeight:this.props.statusBarHeight
+      statusBarHeight:this.props.statusBarHeight,
+      maxTranslateXValue:(-1)**(this.props.position==='right')* Math.ceil(Dimensions.get("window").width * props.minimizeFactor),
     };
     if(this.props.position==='right'){
       this.isPositionRight= true
@@ -47,7 +48,15 @@ class SwipeAbleDrawer extends Component {
     });
     Dimensions.addEventListener("change", this.dimhandler);
   }
-  dimhandler = dims => this.setState({dims: dims.window});
+  dimhandler = dims => {
+    console.log(dims.window.width)
+    console.log(this.props.minimizeFactor)
+    console.log(this.props.position==='right')
+    m = (-1)**(this.props.position==='right') * Math.ceil(dims.window.width * this.props.minimizeFactor);
+    console.log(m)
+    this.setState({dims: dims.window,maxTranslateXValue:m});
+
+  }
 
   blockSwipeAbleDrawer = (isBlock) => {
     this.isBlockDrawer = isBlock;
@@ -56,7 +65,7 @@ class SwipeAbleDrawer extends Component {
   _onStartShouldSetPanResponder = (e, gestureState) => {
     if (this.state.isOpen) {
       this.scale = this.props.scalingFactor;
-      this.translateX = this.maxTranslateXValue;
+      this.translateX = this.state.maxTranslateXValue;
       this.setState({isOpen: false}, () => {
         this.props.onClose && this.props.onClose();
         this.onDrawerAnimation()
@@ -78,9 +87,9 @@ class SwipeAbleDrawer extends Component {
   _onPanResponderMove = (e, {dx}) => {
     if (!this.state.isOpen){
       if ((-1)**this.isPositionRight * dx < 0 ) return false;
-      if ( Math.abs(Math.round(dx)) < Math.abs(this.maxTranslateXValue)) {
+      if ( Math.abs(Math.round(dx)) < Math.abs(this.state.maxTranslateXValue)) {
         this.translateX = Math.round(dx);
-        this.scale = 1 - ((this.translateX  * (1 - this.props.scalingFactor)) / this.maxTranslateXValue);
+        this.scale = 1 - ((this.translateX  * (1 - this.props.scalingFactor)) / this.state.maxTranslateXValue);
 
         this.frontRef.setNativeProps({
           style: {
@@ -101,7 +110,7 @@ class SwipeAbleDrawer extends Component {
     if ((-1)**this.isPositionRight * dx > this.state.dims.width * 0.1) {
       this.setState({isOpen: true}, () => {
         this.scale = this.props.scalingFactor;
-        this.translateX = this.maxTranslateXValue;
+        this.translateX = this.state.maxTranslateXValue;
         this.props.onOpen && this.props.onOpen();
       });
       this.onDrawerAnimation();
@@ -134,7 +143,7 @@ class SwipeAbleDrawer extends Component {
       {
         translateX: this.drawerAnimation.interpolate({
           inputRange: [0, 1],
-          outputRange: [this.translateX, this.maxTranslateXValue],
+          outputRange: [this.translateX, this.state.maxTranslateXValue],
           extrapolate: 'clamp'
         }),
         scale: this.drawerAnimation.interpolate({
@@ -160,7 +169,7 @@ class SwipeAbleDrawer extends Component {
 
   close = () => {
     this.scale = this.props.scalingFactor;
-    this.translateX = this.maxTranslateXValue;
+    this.translateX = this.state.maxTranslateXValue;
     this.setState({isOpen: false}, () => {
       this.onDrawerAnimation();
       this.props.onClose && this.props.onClose();

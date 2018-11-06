@@ -6,6 +6,8 @@ import {
   Animated,
   PanResponder,
   Dimensions,
+  Platform,
+  StatusBar,
   Easing
 } from 'react-native';
 const {width, height} = Dimensions.get('window');
@@ -22,6 +24,7 @@ class SwipeAbleDrawer extends Component {
     this.state = {
       isOpen: false,
       dims: Dimensions.get("window"),
+      statusBarHeight:this.props.statusBarHeight
     };
     if(this.props.position==='right'){
       this.isPositionRight= true
@@ -187,7 +190,8 @@ class SwipeAbleDrawer extends Component {
           {...this.panResponder.panHandlers}
           ref={ref => this.frontRef = ref}
           style={[styles.front, {
-            height:this.state.dims.height,
+            // height:Platform.OS==='iOS'? this.state.dims.height : this.state.dims.height - StatusBar.currentHeight,
+            height:'100%',
             transform: [{translateX}, {scale}]
           },
             styles.shadow,
@@ -197,7 +201,7 @@ class SwipeAbleDrawer extends Component {
           {this.props.children}
           {this.state.isOpen && <View style={styles.mask}/>}
         </Animated.View>
-        <View style={[styles.drawer, this.props.contentWrapperStyle,{height:this.state.dims.height, width: this.state.dims.width}]}>
+        <View style={[styles.drawer, this.props.contentWrapperStyle,{height:Platform.OS==='iOS'? this.state.statusBarHeight : this.state.dims.height - StatusBar.currentHeight, width: this.state.dims.width}]}>
           {this.props.content}
         </View>
       </View>
